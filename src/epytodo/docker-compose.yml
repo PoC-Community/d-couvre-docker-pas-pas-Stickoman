@@ -1,0 +1,34 @@
+services:
+  db:
+    image: mariadb:10.11
+    container_name: epytodo-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpwd
+      MYSQL_DATABASE: epytodo
+      MYSQL_USER: epytodo
+      MYSQL_PASSWORD: epytodo
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./epytodo/epytodo.sql:/docker-entrypoint-initdb.d/epytodo.sql:ro
+    network_mode: host
+
+  app:
+    build:
+      context: ./epytodo
+      dockerfile: Dockerfile
+      network: host
+    container_name: epytodo-app
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: epytodo
+      MYSQL_USER: epytodo
+      MYSQL_PASSWORD: epytodo
+    extra_hosts:
+      - "db:127.0.0.1"
+    depends_on:
+      - db
+    network_mode: host
+
+volumes:
+  mysql-data:
